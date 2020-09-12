@@ -522,7 +522,7 @@ public class NodeTest {
     public void testEqualsComplex() {
         Node<String> complex = createComplexNode();
         Node<String> complexCopy = createComplexNode();
-        assertNotcdSame(complex, complexCopy); //make sure createComplex() didn't return the same objects
+        assertNotSame(complex, complexCopy); //make sure createComplex() didn't return the same objects
 
         assertEquals(complex, complexCopy);
     }
