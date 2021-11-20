@@ -48,3 +48,20 @@ data class FlattenedNode<What>(val item: What, val depth: Int)
 fun <What> List<Pair<What, Int>>.asDepthList(): List<FlattenedNode<What>> {
     return map { (what, depth) -> FlattenedNode(what, depth) }
 }
+
+internal fun <T> Node<T>.isLeaf(): Boolean {
+    return !isRoot && children.isEmpty()
+}
+
+fun <T> Node<out T>.getParents(): Sequence<Node<out Any>> {
+    var lastParent = parent
+    return generateSequence {
+        return@generateSequence lastParent?.also {
+            lastParent = it.parent
+        }
+    }
+}
+
+private fun <T : Any> Node<T>.add(child: T, childConsumer: Node<T>.() -> Unit) {
+    add(Node(child).apply(childConsumer))
+}
