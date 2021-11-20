@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+
+import static java.util.Objects.requireNonNull;
 
 public class Node<T> implements Iterable<Node<T>> {
 
@@ -76,7 +79,7 @@ public class Node<T> implements Iterable<Node<T>> {
     }
 
     public Node(@NotNull T data) {
-        this.data = Objects.requireNonNull(data);
+        this.data = requireNonNull(data);
         this.size = SIZE_INVALIDATED;
         this.children = new ArrayList<>();
     }
@@ -108,20 +111,20 @@ public class Node<T> implements Iterable<Node<T>> {
      */
     @NotNull
     public Node<T> add(@NotNull T data) {
-        Node<T> toAdd = new Node<>(Objects.requireNonNull(data));
+        Node<T> toAdd = new Node<>(requireNonNull(data));
         this.add(toAdd);
         return toAdd;
     }
 
     public void add(@NotNull Node<? extends T> child) {
-        add(Objects.requireNonNull(child), children.size()); //add to the end of the list
+        add(requireNonNull(child), children.size()); //add to the end of the list
     }
 
     /**
      * Adding a node will remove the reference to the current parent: so if you do someList.add(node) then node;s parent will now be someList
      */
     public void add(@NotNull Node<? extends T> node, int index) {
-        Objects.requireNonNull(node);
+        requireNonNull(node);
 
         if (node.isRoot()) {
             for (int i = 0; i < node.children.size(); i++) {
@@ -165,7 +168,7 @@ public class Node<T> implements Iterable<Node<T>> {
      * @return the index of the removed root
      */
     public int remove(@NotNull Node<? extends T> child) {
-        int index = children.indexOf(Objects.requireNonNull(child));
+        int index = children.indexOf(requireNonNull(child));
         remove(index);
         return index;
     }
@@ -177,11 +180,11 @@ public class Node<T> implements Iterable<Node<T>> {
             throw new NullPointerException(msg);
         }
 
-        return Objects.requireNonNull(data);
+        return requireNonNull(data);
     }
 
     public void setData(@NotNull T data) {
-        this.data = Objects.requireNonNull(data);
+        this.data = requireNonNull(data);
     }
 
     @NotNull
@@ -297,7 +300,7 @@ public class Node<T> implements Iterable<Node<T>> {
      * @return True if the node we replaced with is part of the tree, false otherwise when
      */
     public boolean replaceWith(@NotNull Node<T> node) {
-        Objects.requireNonNull(node);
+        requireNonNull(node);
 
         Node<? super T> parent = getParent();
         if (parent == null) return false; //if this node doesn't have a parent, then we can't replace it
@@ -335,25 +338,42 @@ public class Node<T> implements Iterable<Node<T>> {
     @Override
     @NotNull
     public String toString() {
-        return toString(this, 0);
+        return toString(data -> {
+            final String valueOf = String.valueOf(data);
+            return valueOf.replaceAll("\n", "\\n");
+        });
+    }
+
+    /**
+     * A convenience method which allows the data to have a custom toString
+     */
+    @NotNull
+    public String toString(@NotNull final Function<T, String> dataToString) {
+        requireNonNull(dataToString);
+        return toString(this, 0, dataToString);
     }
 
     @NotNull
-    private String toString(@NotNull Node<? extends T> node, int level) {
+    private String toString(@NotNull Node<? extends T> node, int level, @NotNull final Function<T, String> dataToString) {
         StringBuilder builder = new StringBuilder();
         if (level == 0) builder.append("\n");
         for (int i = 0; i < level; i++) builder.append("-");
 
         if (isExpanded()) {
-            if (node.getParent() == null) builder.append("ROOOOOOOOOOT");
-            else builder.append(node.getData());
+            if (node.getParent() == null) {
+                builder.append("ROOT_NODE");
+            } else {
+                final T data = node.getData();
+                final String dataStr = dataToString.apply(data);
+                builder.append(dataStr);
+            }
         } else {
             builder.append("NOT_EXPANDED");
         }
         builder.append("\n");
         for (int i = 0; i < node.children.size(); i++) {
             Node<? extends T> child = node.children.get(i);
-            builder.append(toString(child, level + 1));
+            builder.append(toString(child, level + 1, dataToString));
         }
         return builder.toString();
     }
