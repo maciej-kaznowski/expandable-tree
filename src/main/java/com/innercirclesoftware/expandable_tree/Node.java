@@ -176,7 +176,7 @@ public class Node<T> implements Iterable<Node<T>> {
     @NotNull
     public T getData() {
         if (isRoot()) {
-            String msg = String.format("Root Node %s does not have data", this.toString());
+            String msg = String.format("Root Node %s does not have data", this);
             throw new NullPointerException(msg);
         }
 
@@ -196,8 +196,7 @@ public class Node<T> implements Iterable<Node<T>> {
         try {
             if (parent == null) {
                 int currentProgress = 0;
-                for (int i = 0; i < children.size(); i++) {
-                    Node<? extends T> child = children.get(i);
+                for (Node<? extends T> child : children) {
                     int rootSize = child.size();
                     if (position < currentProgress + rootSize) {
                         //root has the given position, find it
@@ -208,8 +207,7 @@ public class Node<T> implements Iterable<Node<T>> {
             } else {
                 if (position == 0) return this;
                 int currentPos = 1;
-                for (int i = 0; i < children.size(); i++) {
-                    Node<? extends T> child = children.get(i);
+                for (Node<? extends T> child : children) {
                     if (position < currentPos + child.size()) {
                         //specified child has it
                         return (Node<T>) child.get(position - currentPos);
@@ -278,8 +276,7 @@ public class Node<T> implements Iterable<Node<T>> {
 
     public void clear() {
         invalidateSize();
-        for (int i = 0; i < children.size(); i++) {
-            Node<? extends T> node = children.get(i);
+        for (Node<? extends T> node : children) {
             node.parent = null;
             node.invalidateSize();
         }
@@ -379,15 +376,15 @@ public class Node<T> implements Iterable<Node<T>> {
     }
 
     public boolean hasExpandableChildren() {
-        for (int i = 0; i < children.size(); i++) {
-            if (!children.get(i).expanded && children.get(i).childCount() != 0) return true;
+        for (Node<? extends T> child : children) {
+            if (!child.expanded && child.childCount() != 0) return true;
         }
         return false;
     }
 
     public boolean hasCollapsibleChildren() {
-        for (int i = 0; i < children.size(); i++) {
-            if (children.get(i).expanded && children.get(i).childCount() != 0) return true;
+        for (Node<? extends T> child : children) {
+            if (child.expanded && child.childCount() != 0) return true;
         }
         return false;
     }
@@ -430,7 +427,7 @@ public class Node<T> implements Iterable<Node<T>> {
         private final Node node;
 
         NodeIndexOutOfBoundsException(@NotNull Node node, int position) {
-            super(String.format("Invalid index position=%s, size() = %s\n node=%s", position, node.size(), node.toString()));
+            super(String.format("Invalid index position=%s, size() = %s\n node=%s", position, node.size(), node));
             this.node = node;
             this.position = position;
         }
