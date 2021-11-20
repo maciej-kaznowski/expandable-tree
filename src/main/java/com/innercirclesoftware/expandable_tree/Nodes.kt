@@ -49,7 +49,7 @@ fun <What> List<Pair<What, Int>>.asDepthList(): List<FlattenedNode<What>> {
     return map { (what, depth) -> FlattenedNode(what, depth) }
 }
 
-internal fun <T> Node<T>.isLeaf(): Boolean {
+fun <T> Node<T>.isLeaf(): Boolean {
     return !isRoot && children.isEmpty()
 }
 
@@ -62,6 +62,6 @@ fun <T> Node<out T>.getParents(): Sequence<Node<out Any>> {
     }
 }
 
-private fun <T : Any> Node<T>.add(child: T, childConsumer: Node<T>.() -> Unit) {
+fun <T : Any> Node<T>.add(child: T, childConsumer: Node<T>.() -> Unit) {
     add(Node(child).apply(childConsumer))
 }
